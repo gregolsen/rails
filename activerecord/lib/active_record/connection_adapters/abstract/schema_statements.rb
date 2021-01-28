@@ -1571,7 +1571,7 @@ module ActiveRecord
           column_name.nil? && options.key?(:name) && options.except(:name, :algorithm).empty?
         end
 
-        def bulk_change_table(table_name, operations)
+        public def bulk_change_table(table_name, operations)
           sql_fragments = []
           non_combinable_operations = []
 

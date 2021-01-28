@@ -118,7 +118,14 @@ module ActiveRecord
       alias :remove_belongs_to :remove_reference
 
       def change_table(table_name, **options) # :nodoc:
-        yield delegate.update_table_definition(table_name, self)
+        if delegate.supports_bulk_alter? && options[:bulk]
+          recorder = self.class.new(self.delegate)
+          recorder.reverting = true # TODO: probably need to pull this from the options
+          yield recorder.delegate.update_table_definition(table_name, recorder)
+          @commands << [:bulk_change_table, [table_name, recorder.commands]]
+        else
+          yield delegate.update_table_definition(table_name, self)
+        end
       end
 
       def replay(migration)
