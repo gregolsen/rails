@@ -117,8 +117,12 @@ module ActiveRecord
       alias :add_belongs_to :add_reference
       alias :remove_belongs_to :remove_reference
 
-      def change_table(table_name, **options) # :nodoc:
-        yield delegate.update_table_definition(table_name, self)
+      def change_table(table_name, **options, &block) # :nodoc:
+        if delegate.supports_bulk_alter? && options[:bulk]
+          @commands << [:change_table, [table_name, bulk: true, revert: true], block]
+        else
+          yield delegate.update_table_definition(table_name, self)
+        end
       end
 
       def replay(migration)

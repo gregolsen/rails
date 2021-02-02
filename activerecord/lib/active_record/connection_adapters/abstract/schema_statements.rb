@@ -484,6 +484,7 @@ module ActiveRecord
       def change_table(table_name, **options)
         if supports_bulk_alter? && options[:bulk]
           recorder = ActiveRecord::Migration::CommandRecorder.new(self)
+          recorder.reverting = options[:revert]
           yield update_table_definition(table_name, recorder)
           bulk_change_table(table_name, recorder.commands)
         else
